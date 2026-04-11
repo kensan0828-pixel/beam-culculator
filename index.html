@@ -49,29 +49,36 @@ letter-spacing: .04em;
 }
 
 .input-group {
-margin-bottom: 14px;
+display: flex;
+align-items: center;
+gap: 8px;
+margin-bottom: 12px;
 }
 
 .input-group:last-child { margin-bottom: 0; }
 
-label {
-display: flex;
-justify-content: space-between;
-align-items: center;
+.input-group .lbl {
 font-size: 13px;
 color: #a0b4c8;
-margin-bottom: 6px;
+white-space: nowrap;
+flex: 1;
 }
 
-label .unit {
+.input-group .unit {
 font-family: ‘JetBrains Mono’, monospace;
-font-size: 11px;
+font-size: 12px;
 color: #5a7a94;
+white-space: nowrap;
+width: 50px;
+flex-shrink: 0;
+text-align: right;
 }
 
 input[type=“number”] {
-width: 100%;
-padding: 10px 14px;
+width: 100px;
+flex-shrink: 0;
+flex-grow: 0;
+padding: 8px 10px;
 background: #0f1923;
 border: 1px solid #2a3f52;
 border-radius: 8px;
@@ -80,6 +87,7 @@ font-family: ‘JetBrains Mono’, monospace;
 font-size: 16px;
 outline: none;
 transition: border-color .2s;
+text-align: right;
 }
 
 input:focus {
@@ -97,55 +105,31 @@ max-width: 320px;
 height: auto;
 }
 
-.result-grid {
-display: grid;
-grid-template-columns: 1fr 1fr;
-gap: 10px;
+.result-list {
+display: flex;
+flex-direction: column;
+gap: 0;
 }
 
-.result-item {
-background: #0f1923;
-border-radius: 10px;
-padding: 14px;
-text-align: center;
+.result-row {
+display: flex;
+justify-content: space-between;
+align-items: baseline;
+padding: 10px 4px;
+border-bottom: 1px solid rgba(255,255,255,.05);
+font-size: 14px;
 }
 
-.result-label {
-font-size: 11px;
-color: #6b8299;
-margin-bottom: 4px;
+.result-row:last-child { border-bottom: none; }
+
+.result-row .label {
+color: #a0b4c8;
 }
 
-.result-value {
+.result-row .value {
 font-family: ‘JetBrains Mono’, monospace;
-font-size: 18px;
 font-weight: 600;
 color: #4da6e8;
-}
-
-.result-unit {
-font-size: 11px;
-color: #5a7a94;
-margin-top: 2px;
-}
-
-.result-item.highlight {
-grid-column: 1 / -1;
-background: linear-gradient(135deg, #1a3a52, #182635);
-border: 1px solid rgba(77,166,232,.2);
-}
-
-.result-item.highlight .result-value {
-font-size: 22px;
-color: #5cf0a8;
-}
-
-.formula {
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 11px;
-color: #5a7a94;
-text-align: center;
-margin-top: 6px;
 }
 
 button {
@@ -182,13 +166,12 @@ margin-top: 12px;
 <div class="card">
   <div class="card-title">▼ 梁ダイアグラム</div>
   <div class="beam-diagram">
-    <svg viewBox="0 0 320 120">
-      <!-- 支点 -->
+    <svg viewBox="0 0 320 130">
+      <!-- 左：ピン支点 -->
       <polygon points="40,70 30,90 50,90" fill="none" stroke="#4da6e8" stroke-width="2"/>
+      <!-- 右：ローラー支点 -->
       <polygon points="280,70 270,90 290,90" fill="none" stroke="#4da6e8" stroke-width="2"/>
-      <!-- 地面線 -->
-      <line x1="20" y1="90" x2="60" y2="90" stroke="#4da6e8" stroke-width="1.5"/>
-      <line x1="260" y1="90" x2="300" y2="90" stroke="#4da6e8" stroke-width="1.5"/>
+      <line x1="268" y1="93" x2="292" y2="93" stroke="#4da6e8" stroke-width="1.5"/>
       <!-- 梁 -->
       <line x1="40" y1="70" x2="280" y2="70" stroke="#e0e6ed" stroke-width="3" stroke-linecap="round"/>
       <!-- 等分布荷重の矢印 -->
@@ -207,11 +190,11 @@ margin-top: 12px;
       </defs>
       <!-- ラベル -->
       <text x="160" y="20" text-anchor="middle" fill="#5cf0a8" font-size="12" font-family="JetBrains Mono">w (kN/m)</text>
-      <text x="160" y="108" text-anchor="middle" fill="#6b8299" font-size="12" font-family="JetBrains Mono">L (mm)</text>
+      <text x="160" y="120" text-anchor="middle" fill="#6b8299" font-size="12" font-family="JetBrains Mono">L (mm)</text>
       <!-- 寸法線 -->
-      <line x1="40" y1="98" x2="280" y2="98" stroke="#6b8299" stroke-width="0.8"/>
-      <line x1="40" y1="94" x2="40" y2="102" stroke="#6b8299" stroke-width="0.8"/>
-      <line x1="280" y1="94" x2="280" y2="102" stroke="#6b8299" stroke-width="0.8"/>
+      <line x1="40" y1="110" x2="280" y2="110" stroke="#6b8299" stroke-width="0.8"/>
+      <line x1="40" y1="106" x2="40" y2="114" stroke="#6b8299" stroke-width="0.8"/>
+      <line x1="280" y1="106" x2="280" y2="114" stroke="#6b8299" stroke-width="0.8"/>
     </svg>
   </div>
 </div>
@@ -219,73 +202,36 @@ margin-top: 12px;
 <div class="card">
   <div class="card-title">▼ 入力条件</div>
   <div class="input-group">
-    <label>スパン <span class="unit">mm</span></label>
+    <span class="lbl">スパン</span>
     <input type="number" id="span" value="6000" step="100">
+    <span class="unit">mm</span>
   </div>
   <div class="input-group">
-    <label>等分布荷重 <span class="unit">kN/m</span></label>
+    <span class="lbl">等分布荷重</span>
     <input type="number" id="load" value="5.0" step="0.1">
+    <span class="unit">kN/m</span>
   </div>
   <div class="input-group">
-    <label>断面二次モーメント <span class="unit">cm⁴</span></label>
+    <span class="lbl">断面二次モーメント</span>
     <input type="number" id="inertia" value="10000" step="100">
+    <span class="unit">cm⁴</span>
   </div>
   <div class="input-group">
-    <label>断面係数 <span class="unit">cm³</span></label>
+    <span class="lbl">断面係数</span>
     <input type="number" id="section" value="500" step="10">
+    <span class="unit">cm³</span>
   </div>
   <div class="input-group">
-    <label>ヤング係数 <span class="unit">kN/mm²</span></label>
+    <span class="lbl">ヤング係数</span>
     <input type="number" id="young" value="10.5" step="0.1">
+    <span class="unit">kN/mm²</span>
   </div>
   <button onclick="calculate()">計 算</button>
 </div>
 
 <div class="card" id="results" style="display:none;">
   <div class="card-title">▼ 計算結果</div>
-  <div class="result-grid">
-    <div class="result-item">
-      <div class="result-label">反力 R</div>
-      <div class="result-value" id="r-val">-</div>
-      <div class="result-unit">kN</div>
-      <div class="formula">wL/2</div>
-    </div>
-    <div class="result-item">
-      <div class="result-label">最大せん断力 Q</div>
-      <div class="result-value" id="q-val">-</div>
-      <div class="result-unit">kN</div>
-      <div class="formula">wL/2</div>
-    </div>
-    <div class="result-item highlight">
-      <div class="result-label">最大曲げモーメント M</div>
-      <div class="result-value" id="m-val">-</div>
-      <div class="result-unit">kN·m</div>
-      <div class="formula">wL²/8</div>
-    </div>
-    <div class="result-item">
-      <div class="result-label">最大曲げ応力度 σ</div>
-      <div class="result-value" id="s-val">-</div>
-      <div class="result-unit">N/mm²</div>
-      <div class="formula">M/Z</div>
-    </div>
-    <div class="result-item">
-      <div class="result-label">最大たわみ δ</div>
-      <div class="result-value" id="d-val">-</div>
-      <div class="result-unit">mm</div>
-      <div class="formula">5wL⁴/384EI</div>
-    </div>
-    <div class="result-item">
-      <div class="result-label">たわみ/スパン比</div>
-      <div class="result-value" id="ds-val">-</div>
-      <div class="result-unit"></div>
-      <div class="formula">δ/L</div>
-    </div>
-    <div class="result-item">
-      <div class="result-label">たわみ制限 1/300</div>
-      <div class="result-value" id="lim-val">-</div>
-      <div class="result-unit">mm</div>
-    </div>
-  </div>
+  <div class="result-list" id="result-list"></div>
 </div>
 
 <p class="note">※ 自重は含まれていません</p>
@@ -330,21 +276,23 @@ function calculate() {
 
   // 表示
   document.getElementById('results').style.display = 'block';
-  document.getElementById('r-val').textContent = R.toFixed(2);
-  document.getElementById('q-val').textContent = R.toFixed(2);
-  document.getElementById('m-val').textContent = M.toFixed(2);
-  document.getElementById('s-val').textContent = sigma.toFixed(2);
-  document.getElementById('d-val').textContent = delta.toFixed(2);
-  document.getElementById('ds-val').textContent = '1/' + Math.round(ratio);
-  document.getElementById('lim-val').textContent = limit.toFixed(1);
 
-  // たわみ判定の色
-  const dEl = document.getElementById('d-val');
-  if (delta <= limit) {
-    dEl.style.color = '#5cf0a8';
-  } else {
-    dEl.style.color = '#e85454';
-  }
+  const deltaColor = delta <= limit ? '#5cf0a8' : '#e85454';
+  const rows = [
+    ['反力 R (wL/2)', R.toFixed(2) + ' kN'],
+    ['最大せん断力 Q (wL/2)', R.toFixed(2) + ' kN'],
+    ['最大曲げモーメント M (wL²/8)', M.toFixed(2) + ' kN·m'],
+    ['最大曲げ応力度 σ (M/Z)', sigma.toFixed(2) + ' N/mm²'],
+    ['最大たわみ δ (5wL⁴/384EI)', delta.toFixed(2) + ' mm', deltaColor],
+    ['たわみ/スパン比', '1/' + Math.round(ratio)],
+    ['たわみ制限 L/300', limit.toFixed(1) + ' mm'],
+  ];
+
+  const list = document.getElementById('result-list');
+  list.innerHTML = rows.map(r => {
+    const color = r[2] || '#4da6e8';
+    return `<div class="result-row"><span class="label">${r[0]}</span><span class="value" style="color:${color}">${r[1]}</span></div>`;
+  }).join('');
 
   // スクロール
   document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
