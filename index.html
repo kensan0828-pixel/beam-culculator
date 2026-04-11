@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>単純梁計算 - 等分布荷重</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+min-height: 100vh;
+background: #0f1923;
+font-family: ‘Noto Sans JP’, sans-serif;
+color: #e0e6ed;
+padding: 20px 16px 40px;
+}
+
+h1 {
+text-align: center;
+font-size: 20px;
+font-weight: 700;
+margin-bottom: 4px;
+color: #fff;
+}
+
+.subtitle {
+text-align: center;
+font-size: 12px;
+color: #6b8299;
+margin-bottom: 24px;
+}
+
+.card {
+background: #182635;
+border-radius: 14px;
+padding: 20px;
+margin-bottom: 16px;
+border: 1px solid rgba(255,255,255,.06);
+}
+
+.card-title {
+font-size: 13px;
+font-weight: 600;
+color: #4da6e8;
+margin-bottom: 14px;
+letter-spacing: .04em;
+}
+
+.input-group {
+margin-bottom: 14px;
+}
+
+.input-group:last-child { margin-bottom: 0; }
+
+label {
+display: flex;
+justify-content: space-between;
+align-items: center;
+font-size: 13px;
+color: #a0b4c8;
+margin-bottom: 6px;
+}
+
+label .unit {
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 11px;
+color: #5a7a94;
+}
+
+input[type=“number”] {
+width: 100%;
+padding: 10px 14px;
+background: #0f1923;
+border: 1px solid #2a3f52;
+border-radius: 8px;
+color: #fff;
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 16px;
+outline: none;
+transition: border-color .2s;
+}
+
+input:focus {
+border-color: #4da6e8;
+}
+
+.beam-diagram {
+text-align: center;
+padding: 10px 0;
+}
+
+.beam-diagram svg {
+width: 100%;
+max-width: 320px;
+height: auto;
+}
+
+.result-grid {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 10px;
+}
+
+.result-item {
+background: #0f1923;
+border-radius: 10px;
+padding: 14px;
+text-align: center;
+}
+
+.result-label {
+font-size: 11px;
+color: #6b8299;
+margin-bottom: 4px;
+}
+
+.result-value {
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 18px;
+font-weight: 600;
+color: #4da6e8;
+}
+
+.result-unit {
+font-size: 11px;
+color: #5a7a94;
+margin-top: 2px;
+}
+
+.result-item.highlight {
+grid-column: 1 / -1;
+background: linear-gradient(135deg, #1a3a52, #182635);
+border: 1px solid rgba(77,166,232,.2);
+}
+
+.result-item.highlight .result-value {
+font-size: 22px;
+color: #5cf0a8;
+}
+
+.formula {
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 11px;
+color: #5a7a94;
+text-align: center;
+margin-top: 6px;
+}
+
+button {
+width: 100%;
+padding: 14px;
+background: linear-gradient(135deg, #4da6e8, #3578b2);
+border: none;
+border-radius: 10px;
+color: #fff;
+font-family: ‘Noto Sans JP’, sans-serif;
+font-size: 15px;
+font-weight: 600;
+cursor: pointer;
+transition: transform .15s;
+margin-top: 4px;
+}
+
+button:active { transform: scale(.97); }
+
+.note {
+text-align: center;
+font-size: 11px;
+color: #4a6478;
+margin-top: 12px;
+}
+</style>
+
+</head>
+<body>
+
+<h1>単純梁の構造計算</h1>
+<p class="subtitle">等分布荷重 Simply Supported Beam</p>
+
+<div class="card">
+  <div class="card-title">▼ 梁ダイアグラム</div>
+  <div class="beam-diagram">
+    <svg viewBox="0 0 320 120">
+      <!-- 支点 -->
+      <polygon points="40,70 30,90 50,90" fill="none" stroke="#4da6e8" stroke-width="2"/>
+      <polygon points="280,70 270,90 290,90" fill="none" stroke="#4da6e8" stroke-width="2"/>
+      <!-- 地面線 -->
+      <line x1="20" y1="90" x2="60" y2="90" stroke="#4da6e8" stroke-width="1.5"/>
+      <line x1="260" y1="90" x2="300" y2="90" stroke="#4da6e8" stroke-width="1.5"/>
+      <!-- 梁 -->
+      <line x1="40" y1="70" x2="280" y2="70" stroke="#e0e6ed" stroke-width="3" stroke-linecap="round"/>
+      <!-- 等分布荷重の矢印 -->
+      <line x1="40" y1="30" x2="280" y2="30" stroke="#5cf0a8" stroke-width="1.5"/>
+      <line x1="40" y1="30" x2="40" y2="65" stroke="#5cf0a8" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="80" y1="30" x2="80" y2="65" stroke="#5cf0a8" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="120" y1="30" x2="120" y2="65" stroke="#5cf0a8" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="160" y1="30" x2="160" y2="65" stroke="#5cf0a8" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="200" y1="30" x2="200" y2="65" stroke="#5cf0a8" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="240" y1="30" x2="240" y2="65" stroke="#5cf0a8" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="280" y1="30" x2="280" y2="65" stroke="#5cf0a8" stroke-width="1" marker-end="url(#arrow)"/>
+      <defs>
+        <marker id="arrow" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+          <path d="M0,0 L6,3 L0,6 Z" fill="#5cf0a8"/>
+        </marker>
+      </defs>
+      <!-- ラベル -->
+      <text x="160" y="20" text-anchor="middle" fill="#5cf0a8" font-size="12" font-family="JetBrains Mono">w (kN/m)</text>
+      <text x="160" y="108" text-anchor="middle" fill="#6b8299" font-size="12" font-family="JetBrains Mono">L (mm)</text>
+      <!-- 寸法線 -->
+      <line x1="40" y1="98" x2="280" y2="98" stroke="#6b8299" stroke-width="0.8"/>
+      <line x1="40" y1="94" x2="40" y2="102" stroke="#6b8299" stroke-width="0.8"/>
+      <line x1="280" y1="94" x2="280" y2="102" stroke="#6b8299" stroke-width="0.8"/>
+    </svg>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">▼ 入力条件</div>
+  <div class="input-group">
+    <label>スパン <span class="unit">mm</span></label>
+    <input type="number" id="span" value="6000" step="100">
+  </div>
+  <div class="input-group">
+    <label>等分布荷重 <span class="unit">kN/m</span></label>
+    <input type="number" id="load" value="5.0" step="0.1">
+  </div>
+  <div class="input-group">
+    <label>断面二次モーメント <span class="unit">cm⁴</span></label>
+    <input type="number" id="inertia" value="10000" step="100">
+  </div>
+  <div class="input-group">
+    <label>断面係数 <span class="unit">cm³</span></label>
+    <input type="number" id="section" value="500" step="10">
+  </div>
+  <div class="input-group">
+    <label>ヤング係数 <span class="unit">kN/mm²</span></label>
+    <input type="number" id="young" value="10.5" step="0.1">
+  </div>
+  <button onclick="calculate()">計 算</button>
+</div>
+
+<div class="card" id="results" style="display:none;">
+  <div class="card-title">▼ 計算結果</div>
+  <div class="result-grid">
+    <div class="result-item">
+      <div class="result-label">反力 R</div>
+      <div class="result-value" id="r-val">-</div>
+      <div class="result-unit">kN</div>
+      <div class="formula">wL/2</div>
+    </div>
+    <div class="result-item">
+      <div class="result-label">最大せん断力 Q</div>
+      <div class="result-value" id="q-val">-</div>
+      <div class="result-unit">kN</div>
+      <div class="formula">wL/2</div>
+    </div>
+    <div class="result-item highlight">
+      <div class="result-label">最大曲げモーメント M</div>
+      <div class="result-value" id="m-val">-</div>
+      <div class="result-unit">kN·m</div>
+      <div class="formula">wL²/8</div>
+    </div>
+    <div class="result-item">
+      <div class="result-label">最大曲げ応力度 σ</div>
+      <div class="result-value" id="s-val">-</div>
+      <div class="result-unit">N/mm²</div>
+      <div class="formula">M/Z</div>
+    </div>
+    <div class="result-item">
+      <div class="result-label">最大たわみ δ</div>
+      <div class="result-value" id="d-val">-</div>
+      <div class="result-unit">mm</div>
+      <div class="formula">5wL⁴/384EI</div>
+    </div>
+    <div class="result-item">
+      <div class="result-label">たわみ/スパン比</div>
+      <div class="result-value" id="ds-val">-</div>
+      <div class="result-unit"></div>
+      <div class="formula">δ/L</div>
+    </div>
+    <div class="result-item">
+      <div class="result-label">たわみ制限 1/300</div>
+      <div class="result-value" id="lim-val">-</div>
+      <div class="result-unit">mm</div>
+    </div>
+  </div>
+</div>
+
+<p class="note">※ 自重は含まれていません</p>
+
+<script>
+function calculate() {
+  const L_mm = parseFloat(document.getElementById('span').value);
+  const w = parseFloat(document.getElementById('load').value);       // kN/m
+  const I = parseFloat(document.getElementById('inertia').value);    // cm4
+  const Z = parseFloat(document.getElementById('section').value);    // cm3
+  const E = parseFloat(document.getElementById('young').value);      // kN/mm2
+
+  const L_m = L_mm / 1000;
+
+  // 反力・せん断力 (kN)
+  const R = (w * L_m) / 2;
+
+  // 最大曲げモーメント (kN·m)
+  const M = (w * L_m * L_m) / 8;
+
+  // 最大曲げ応力度 (N/mm2)
+  // M(kN·m) → M*10^6 (N·mm), Z(cm3) → Z*10^3 (mm3)
+  const sigma = (M * 1e6) / (Z * 1e3);
+
+  // 最大たわみ (mm)
+  // w(kN/m) → w(N/mm) = w/1000*1000/1000 = w*1 → w (kN/m) = w/1000 (kN/mm)
+  // → w(N/mm) = w * 1000 / 1000 = w (N/mm)... 
+  // w(kN/m) = w * 10^-3 (kN/mm)
+  // I(cm4) = I * 10^4 (mm4)
+  // E(kN/mm2)
+  // δ = 5wL^4 / (384EI)
+  // w in kN/mm, L in mm, E in kN/mm2, I in mm4
+  const w_kN_mm = w / 1e3; // kN/m → kN/mm
+  const I_mm4 = I * 1e4;   // cm4 → mm4
+  const delta = (5 * w_kN_mm * Math.pow(L_mm, 4)) / (384 * E * I_mm4);
+
+  // たわみ/スパン比
+  const ratio = L_mm / delta;
+
+  // たわみ制限
+  const limit = L_mm / 300;
+
+  // 表示
+  document.getElementById('results').style.display = 'block';
+  document.getElementById('r-val').textContent = R.toFixed(2);
+  document.getElementById('q-val').textContent = R.toFixed(2);
+  document.getElementById('m-val').textContent = M.toFixed(2);
+  document.getElementById('s-val').textContent = sigma.toFixed(2);
+  document.getElementById('d-val').textContent = delta.toFixed(2);
+  document.getElementById('ds-val').textContent = '1/' + Math.round(ratio);
+  document.getElementById('lim-val').textContent = limit.toFixed(1);
+
+  // たわみ判定の色
+  const dEl = document.getElementById('d-val');
+  if (delta <= limit) {
+    dEl.style.color = '#5cf0a8';
+  } else {
+    dEl.style.color = '#e85454';
+  }
+
+  // スクロール
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+}
+
+// 初回計算
+calculate();
+</script>
+
+</body>
+</html>
