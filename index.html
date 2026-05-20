@@ -266,7 +266,7 @@ function calculate() {
   const ratio = L_mm / delta;
 
   // たわみ制限
-  const limit = L_mm / 300;
+  const limit = L_mm / 250;
 
   // 表示
   document.getElementById('results').style.display = 'block';
@@ -279,7 +279,7 @@ function calculate() {
     ['最大曲げ応力度 σ (M/Z)', sigma.toFixed(2) + ' N/mm²'],
     ['最大たわみ δ (5wL⁴/384EI)', delta.toFixed(2) + ' mm', deltaColor],
     ['たわみ/スパン比', '1/' + Math.round(ratio)],
-    ['たわみ制限 L/300', limit.toFixed(1) + ' mm'],
+    ['たわみ制限 L/250', limit.toFixed(1) + ' mm'],
   ];
 
   const list = document.getElementById('result-list');
