@@ -49,7 +49,8 @@ letter-spacing: .04em;
 }
 
 .input-group {
-display: flex;
+display: grid;
+grid-template-columns: 1fr 100px 50px;
 align-items: center;
 gap: 8px;
 margin-bottom: 12px;
@@ -60,8 +61,8 @@ margin-bottom: 12px;
 .input-group .lbl {
 font-size: 13px;
 color: #a0b4c8;
-white-space: nowrap;
-flex: 1;
+word-break: keep-all;
+overflow-wrap: break-word;
 }
 
 .input-group .unit {
@@ -69,18 +70,13 @@ font-family: ‘JetBrains Mono’, monospace;
 font-size: 12px;
 color: #5a7a94;
 white-space: nowrap;
-width: 50px;
-flex-shrink: 0;
 text-align: right;
 }
 
-input[type=“number”] {
-width: 100px;
-min-width: 100px;
-max-width: 100px;
-flex-shrink: 0;
-flex-grow: 0;
+input[type=”number”] {
+width: 100%;
 padding: 12px 10px;
+min-width: 0;
 background: #0f1923;
 border: 1px solid #2a3f52;
 border-radius: 8px;
